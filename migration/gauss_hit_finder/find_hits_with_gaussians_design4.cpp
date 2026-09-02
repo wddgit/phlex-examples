@@ -10,8 +10,9 @@
 #include <numeric>
 
 #include "copied_from_larsoft_minor_edits/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
+#include "copied_from_larsoft_minor_edits/ICandidateHitFinder.h"
 #include "copied_from_larsoft_minor_edits/RawTypes.h" // raw::ChannelID_t
-#include "find_hits_with_gaussians_design3.hpp"
+#include "find_hits_with_gaussians_design4.hpp"
 
 namespace {
   // Convert from the new hit_candidate_vec type to the legacy
@@ -61,24 +62,24 @@ namespace examples {
   // First unfold: vector<Wire> -> individual Wire objects
   // ---------------------------------------------------------------
 
-  unfold_wire_vector_design3::unfold_wire_vector_design3(
+  unfold_wire_vector_design4::unfold_wire_vector_design4(
     std::vector<recob::Wire> const& wires) :
     begin_{wires.begin()}, end_{wires.end()}
   {
     // Probably eventually delete the following line
     // (or convert to logging utility)
-    std::cout << "Finding hits with Gaussians (design 3)." << std::endl;
+    std::cout << "Finding hits with Gaussians (design 4)." << std::endl;
   }
 
-  unfold_wire_vector_design3::const_iterator unfold_wire_vector_design3::initial_value() const
+  unfold_wire_vector_design4::const_iterator unfold_wire_vector_design4::initial_value() const
   {
     return begin_;
   }
 
-  bool unfold_wire_vector_design3::predicate(const_iterator current) const { return current != end_; }
+  bool unfold_wire_vector_design4::predicate(const_iterator current) const { return current != end_; }
 
-  std::pair<unfold_wire_vector_design3::const_iterator, recob::Wire>
-  unfold_wire_vector_design3::unfold(const_iterator current) const
+  std::pair<unfold_wire_vector_design4::const_iterator, recob::Wire>
+  unfold_wire_vector_design4::unfold(const_iterator current) const
   {
     recob::Wire const& wire = *current;
     // Note this copies the Wire object.
@@ -91,22 +92,22 @@ namespace examples {
   // Second unfold: Wire -> individual wire_roi_data objects
   // ---------------------------------------------------------------
 
-  unfold_wire_design3::unfold_wire_design3(recob::Wire const& wire) :
+  unfold_wire_design4::unfold_wire_design4(recob::Wire const& wire) :
     wire_{wire}, n_ranges_{wire.SignalROI().n_ranges()}
   {}
 
-  unfold_wire_design3::state_type unfold_wire_design3::initial_value() const
+  unfold_wire_design4::state_type unfold_wire_design4::initial_value() const
   {
     return 0;
   }
 
-  bool unfold_wire_design3::predicate(state_type current) const
+  bool unfold_wire_design4::predicate(state_type current) const
   {
     return current < n_ranges_;
   }
 
-  std::pair<unfold_wire_design3::state_type, wire_roi_data>
-  unfold_wire_design3::unfold(state_type current) const
+  std::pair<unfold_wire_design4::state_type, wire_roi_data>
+  unfold_wire_design4::unfold(state_type current) const
   {
     recob::Wire::RegionsOfInterest_t const& signalROI = wire_.SignalROI();
 
@@ -128,14 +129,13 @@ namespace examples {
   // Transform: processes pre-computed merged hit candidates for a
   // single ROI and returns the hits found.
   //
-  // This is the same algorithm as design2, except the
-  // cand_hit_standard finding/merging step has been removed — the
-  // merged candidates are provided as a separate input produced by
-  // the upstream cand_hit_standard transform.
+  // This is the same algorithm as design3.  The only difference
+  // is that the registration has been split into four separate
+  // modules (see register_*_design4.cpp files).
   // ---------------------------------------------------------------
 
-  std::vector<recob::Hit> find_hits_with_gaussians_design3(
-    find_hits_with_gaussians_design3_cfg const& cfg,
+  std::vector<recob::Hit> find_hits_with_gaussians_design4(
+    find_hits_with_gaussians_design4_cfg const& cfg,
     wire_roi_data const& roi_data,
     merge_hit_candidate_vec const& merged_candidates,
     PeakFitterMrqdt const& peak_fitter_mrqdt,
@@ -504,7 +504,7 @@ namespace examples {
   // Inner fold: collects hits from individual ROIs into a
   // per-wire vector  (roi layer -> wire layer)
   // ---------------------------------------------------------------
-  void fold_roi_hits_design3(std::vector<recob::Hit>& hits,
+  void fold_roi_hits_design4(std::vector<recob::Hit>& hits,
                              std::vector<recob::Hit> const& hits_from_roi)
   {
     hits.insert(hits.end(), hits_from_roi.begin(), hits_from_roi.end());
@@ -514,7 +514,7 @@ namespace examples {
   // Outer fold: collects per-wire hit vectors into the final
   // output vector  (wire layer -> spill layer)
   // ---------------------------------------------------------------
-  void fold_hits_into_vector_design3(std::vector<recob::Hit>& hits,
+  void fold_hits_into_vector_design4(std::vector<recob::Hit>& hits,
                                      std::vector<recob::Hit> const& hits_from_wire)
   {
     hits.insert(hits.end(), hits_from_wire.begin(), hits_from_wire.end());
