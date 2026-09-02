@@ -93,6 +93,28 @@ second input to the Gaussian hit-fitting transform.
 7. hit_candidate.hpp
 8. wire_roi_data.hpp
 
+Design 4 extends design 3 by splitting the registration
+into four separate modules: unfolds, candidate-hit-finding
+transform, Gaussian hit-fitting transform, and folds.
+Each module is in its own shared library so that individual
+pieces can be swapped independently. For example, an
+alternative candidate-hit-finding implementation can be
+provided by registering a different module that produces
+`merge_hit_candidate_vec` from `wire_roi_data`. The
+algorithm logic is otherwise identical to design 3.
+
+1. find_hits_with_gaussians_design4.hpp
+2. find_hits_with_gaussians_design4.cpp
+3. register_find_hits_with_gaussians_design4.cpp
+4. register_cand_hit_standard_design4.cpp
+5. register_unfolds_design4.cpp
+6. register_folds_design4.cpp
+7. test_find_hits_with_gaussians_design4.jsonnet
+8. cand_hit_standard.hpp
+9. cand_hit_standard.cpp
+10. hit_candidate.hpp
+11. wire_roi_data.hpp
+
 We plan to implement more prototype migrations
 of GausHitFinder in the future to explore the
 possibilities and execute tests.
@@ -118,9 +140,8 @@ temporary and not part of the migration example.
 7. art_hits_*.txt
 8. wires_*.dat
 9. register_find_hits_with_gaussians_cell_id.cpp
-10. examples_generate_layers.cpp
-11. run_test.sh
-12. compare_hits.py
+10. run_test.sh
+11. compare_hits.py
 
 ## Files copied from LArSoft
 
@@ -156,11 +177,14 @@ step (`cand_hit_standard`) into its own transform, separate from
 the Gaussian hit-fitting transform. Both transforms receive
 `wire_roi_data` from the second unfold, and the merged hit
 candidates flow from `cand_hit_standard` into the fitting
-transform as a second input. A future design 4 will move the
-`cand_hit_standard` registration into a separate module so that
-alternative candidate-hit-finding implementations can be
-swapped in independently.
-We plan to run tests and compare the different versions.
+transform as a second input. Design 4 takes this further by
+splitting the registration into four separate modules (unfolds,
+candidate-hit-finding, Gaussian fitting, and folds), each in its
+own shared library. This allows any piece to be swapped
+independently; for example, an alternative candidate-hit-finding
+implementation can be provided by registering a different module.
+We plan to make more versions, run tests and compare the different
+versions.
 
 `Phlex` will not support the `Tools` feature that existed in
 `art`. One possibility is that algorithm nodes scheduled
@@ -178,6 +202,13 @@ new standalone implementation (`cand_hit_standard` namespace)
 that uses new types (`hit_candidate`, `merge_hit_candidate_vec`)
 rather than the legacy `ICandidateHitFinder` types. A conversion
 to legacy types is done where `PeakFitterMrqdt` still requires them.
+In design 4, the `cand_hit_standard` transform is registered in
+its own module (`register_cand_hit_standard_design4.cpp`), separate
+from the Gaussian fitting transform, unfolds, and folds. Because
+each piece lives in its own shared library, swapping in an
+alternative candidate-hit-finding algorithm only requires
+providing a different module that produces `merge_hit_candidate_vec`
+from `wire_roi_data`.
 
 I do not know yet how to deal with the fact that `GausHitFinder`
 can be configured to produce 1 or 2 output data products.

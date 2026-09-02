@@ -5,6 +5,7 @@ add_library(find_hits_with_gaussians SHARED
     find_hits_with_gaussians_design1.cpp
     find_hits_with_gaussians_design2.cpp
     find_hits_with_gaussians_design3.cpp
+    find_hits_with_gaussians_design4.cpp
     cand_hit_standard.cpp
     copied_from_larsoft_minor_edits/Hit.cxx
     copied_from_larsoft_minor_edits/geo_types.cxx
@@ -23,7 +24,7 @@ add_library(wires_source MODULE wires_source.cpp)
 target_link_libraries(wires_source PRIVATE phlex::module find_hits_with_gaussians)
 
 # Design variants used for both library registration and testing
-set(designs 0 1 2 3)
+set(designs 0 1 2 3 4)
 
 # Register experiment libraries with Phlex
 foreach(d IN LISTS designs)
@@ -32,6 +33,21 @@ foreach(d IN LISTS designs)
   target_link_libraries(find_hits_with_gaussians_design${d}_hof PRIVATE
                         phlex::module find_hits_with_gaussians)
 endforeach()
+
+add_library(unfolds_design4_hof MODULE
+            register_unfolds_design4.cpp)
+target_link_libraries(unfolds_design4_hof PRIVATE
+                      phlex::module find_hits_with_gaussians)
+
+add_library(cand_hit_standard_design4_hof MODULE
+            register_cand_hit_standard_design4.cpp)
+target_link_libraries(cand_hit_standard_design4_hof PRIVATE
+                      phlex::module find_hits_with_gaussians)
+
+add_library(folds_design4_hof MODULE
+            register_folds_design4.cpp)
+target_link_libraries(folds_design4_hof PRIVATE
+                      phlex::module find_hits_with_gaussians)
 
 add_library(find_hits_with_gaussians_cell_id_hof MODULE
             register_find_hits_with_gaussians_cell_id.cpp)
@@ -66,6 +82,10 @@ file(COPY ${test_files_art} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 #   design3 - like design2 but with a separate transform that finds
 #             and merges hit candidates inserted between the second
 #             unfold and the Gaussian hit-fitting transform
+#   design4 - like design3 except the registration file has been
+#             split into one registration for the unfolds, one for
+#             candidate finder, one for the rest of the hit finder,
+#             and one for the folds.
 #
 # All variants use a common wrapper script (run_test.sh) that deletes
 # stale output files before the running phlex and then verifies all
