@@ -8,7 +8,7 @@ This repository contains examples of the use of the
 To use the code in this repository, first install it:
 
 ```console
-git clone -b phlex-v0.3 https://github.com/Framework-R-D/phlex-examples.git
+git clone -b phlex-v0.4 https://github.com/Framework-R-D/phlex-examples.git
 ```
 
 Now create a build directory:
@@ -122,9 +122,4 @@ Processed layers:
 ```
 
 > [!NOTE]
-> For Phlex v0.1.0, Python data products:
->
-> - Cannot be written to output files
-> - Must belong to the `"job"` data layer
->
-> For Phlex v0.3.0, Python data products cannot be written to output files.
+> For Phlex v0.4.0, Python data products cannot be written to output files.
