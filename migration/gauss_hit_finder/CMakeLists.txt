@@ -8,6 +8,7 @@ add_library(
   find_hits_with_gaussians_design2.cpp
   find_hits_with_gaussians_design3.cpp
   find_hits_with_gaussians_design4.cpp
+  find_hits_with_gaussians_design5.cpp
   copied_from_larsoft_minor_edits/Hit.cxx
   copied_from_larsoft_minor_edits/geo_types.cxx
   copied_from_larsoft_minor_edits/CandHitStandard.cxx
